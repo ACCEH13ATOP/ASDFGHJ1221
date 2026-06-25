@@ -1,0 +1,132 @@
+-- ==========================================
+-- СОЗДАНИЕ БАЗЫ ДАННЫХ (Синтаксис MS SQL Server)
+-- ==========================================
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'UniversityDB')
+BEGIN
+    CREATE DATABASE UniversityDB;
+END
+GO
+
+USE UniversityDB;
+GO
+
+-- ==========================================
+-- ЭТАП 1: Создание структуры БД (DDL)
+-- ==========================================
+
+-- 1. Справочник категорий преподавателей
+CREATE TABLE Categories (
+    id INT PRIMARY KEY,
+    name NVARCHAR(50) NOT NULL,
+    salary DECIMAL(10,2) NOT NULL
+);
+GO
+
+-- 2. Справочник циклов дисциплин
+CREATE TABLE Cycles (
+    id INT PRIMARY KEY,
+    name NVARCHAR(50) NOT NULL
+);
+GO
+
+-- 3. Справочник преподавателей
+CREATE TABLE Teachers (
+    id INT PRIMARY KEY,
+    last_name NVARCHAR(100) NOT NULL,
+    first_name NVARCHAR(50),
+    patronymic NVARCHAR(50),
+    category_id INT,
+    address NVARCHAR(255),
+    FOREIGN KEY (category_id) REFERENCES Categories(id) ON DELETE NO ACTION
+);
+GO
+
+-- 4. Справочник предметов
+CREATE TABLE Subjects (
+    id INT PRIMARY KEY,
+    name NVARCHAR(255) NOT NULL
+);
+GO
+
+-- 5. Таблица нагрузки
+CREATE TABLE Workload (
+    id INT PRIMARY KEY,
+    teacher_id INT,
+    subject_id INT,
+    cycle_id INT,
+    hours INT,
+    FOREIGN KEY (teacher_id) REFERENCES Teachers(id) ON DELETE NO ACTION,
+    FOREIGN KEY (subject_id) REFERENCES Subjects(id) ON DELETE NO ACTION,
+    FOREIGN KEY (cycle_id) REFERENCES Cycles(id) ON DELETE NO ACTION
+);
+GO
+
+-- 6. Таблица пользователей для авторизации
+CREATE TABLE Users (
+    id INT PRIMARY KEY,
+    login NVARCHAR(50) NOT NULL UNIQUE,
+    password NVARCHAR(50) NOT NULL
+);
+GO
+
+-- ==========================================
+-- ЭТАП 2: Заполнение базы данных (DML)
+-- ==========================================
+
+-- Заполнение справочника категорий
+INSERT INTO Categories (id, name, salary) VALUES 
+(1, N'Высшая', 4140.00), 
+(2, N'Первая', 3960.00), 
+(3, N'Вторая', 3780.00);
+GO
+
+-- Заполнение справочника циклов
+INSERT INTO Cycles (id, name) VALUES 
+(1, N'ОП'), 
+(2, N'ОГСЭ'), 
+(3, N'СД');
+GO
+
+-- Заполнение справочника преподавателей 
+INSERT INTO Teachers (id, last_name, first_name, patronymic, category_id, address) VALUES 
+(1, N'Гракова', N'У.', N'В.', 1, N'ул. Мопра, 123-3'),
+(2, N'Костина', N'В.', N'В.', 2, N'ул. Хлыновская, 51-20'),
+(3, N'Орлова', N'Н.', N'Н.', 3, N'ул. Озерная, 11-65'),
+(4, N'Романова', N'П.', N'Т.', 2, N'ул. Володарского, 5-183'),
+(5, N'Хорошавина', N'О.', N'Ю.', 3, N'ул. Богородская, 59-2'),
+(6, N'Перминова', N'Ж.', N'А.', 2, N'ул. Некрасова, 10-33'),
+(7, N'Комарова', N'С.', N'В.', 3, N'ул. Вятская, 18/1-11'),
+(8, N'Пушкова', N'Р.', N'О.', 3, N'ул. Воровского, 3-71'),
+(9, N'Семанов', N'Ф.', N'О.', 1, N'ул. Свободы, 128-19');
+GO
+
+-- Заполнение справочника предметов
+INSERT INTO Subjects (id, name) VALUES 
+(1, N'Практикум по решению задач на ЭВМ'),
+(2, N'Иностранный язык'),
+(3, N'Информационные и коммуникационные технологии в образовании'),
+(4, N'Компьютерное моделирование'),
+(5, N'Методика обучения информатики'),
+(6, N'Основы теории информации');
+GO
+
+-- Заполнение таблицы нагрузки 
+INSERT INTO Workload (id, teacher_id, subject_id, cycle_id, hours) VALUES 
+(1, 1, 1, 1, 200),  
+(2, 2, 2, 2, 200),  
+(3, 3, 2, 2, 200),  
+(4, 4, 2, 2, 200),  
+(5, 5, 2, 2, 200),  
+(6, 6, 3, 3, 100),  
+(7, 7, 3, 3, 100),  
+(8, 8, 4, 3, 100),  
+(9, 1, 5, 3, 100),  
+(10, 9, 5, 3, 100), 
+(11, 7, 1, 3, 200), 
+(12, 8, 6, 3, 90);  
+GO
+
+-- Создание тестового пользователя
+INSERT INTO Users (id, login, password) VALUES 
+(1, N'admin', N'admin');
+GO
